@@ -1,53 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Server Panel</title>
+<title>Server</title>
 
 <style>
-body {
-  background:#020617;
-  color:white;
-  font-family:Inter;
-  padding:40px;
+body{
+background:#020617;
+color:white;
+font-family:Inter;
+padding:40px;
 }
 
-.box {
-  background:#0f172a;
-  padding:20px;
-  border-radius:15px;
-  margin-bottom:20px;
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
 }
 
-input {
-  padding:10px;
-  border-radius:8px;
-  border:none;
-  margin-top:10px;
+input{
+padding:10px;
+border:none;
+border-radius:8px;
 }
 
-button {
-  padding:10px 20px;
-  background:#3b82f6;
-  color:white;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
+button{
+padding:10px;
+background:#3b82f6;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
 }
 </style>
 </head>
 
 <body>
 
-<h1>⚙️ Server Settings</h1>
+<h1>⚙️ Server Panel</h1>
 
-<div class="box">
-  <h3>Prefix</h3>
-  <form method="POST">
-    <input type="text" name="prefix" value="{{ prefix }}">
-    <br><br>
-    <button>Save</button>
-  </form>
+<form method="POST">
+
+<div class="card">
+<h3>Prefix</h3>
+<input type="text" name="prefix" value="{{ settings.prefix }}">
 </div>
+
+<div class="card">
+<h3>Modules</h3>
+
+<label>Fun</label>
+<input type="checkbox" name="fun" {% if settings.fun %}checked{% endif %}><br>
+
+<label>Moderation</label>
+<input type="checkbox" name="moderation" {% if settings.moderation %}checked{% endif %}>
+</div>
+
+<button>Save</button>
+
+</form>
 
 </body>
 </html>
