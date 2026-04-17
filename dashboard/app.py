@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, session, url_for, render_template
+from flask import Flask, app, redirect, request, session, url_for, render_template
 import requests
 import os
 from dotenv import load_dotenv
@@ -6,7 +6,8 @@ from dotenv import load_dotenv
 from pathlib import Path
 load_dotenv(dotenv_path=Path("../.env"))
 
-app = Flask(__name__)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
 app.secret_key = "supersecretkey"
 
 CLIENT_ID = os.getenv("CLIENT_ID")
