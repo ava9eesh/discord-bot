@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Discord Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+    body {
+      background: linear-gradient(135deg, #0f172a, #020617);
+      color: white;
+    }
+
+    nav {
+      display:flex;
+      justify-content:space-between;
+      padding:20px 60px;
+      backdrop-filter: blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.1);
+    }
+
+    .logo {
+      font-size:24px;
+      font-weight:900;
+      background:linear-gradient(90deg,#3b82f6,#a855f7);
+      -webkit-background-clip:text;
+      color:transparent;
+    }
+
+    .btn {
+      background:linear-gradient(90deg,#3b82f6,#a855f7);
+      padding:10px 20px;
+      border-radius:12px;
+      text-decoration:none;
+      color:white;
+      font-weight:600;
+      transition:.2s;
+    }
+
+    .btn:hover { transform:scale(1.05); }
+
+    .hero {
+      text-align:center;
+      padding:120px 20px;
+    }
+
+    .hero h1 {
+      font-size:60px;
+      font-weight:900;
+      background:linear-gradient(90deg,#3b82f6,#a855f7,#ec4899);
+      -webkit-background-clip:text;
+      color:transparent;
+    }
+
+    .hero p {
+      margin-top:20px;
+      color:#94a3b8;
+      font-size:18px;
+    }
+
+    .cta {
+      margin-top:40px;
+    }
+
+    .features {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap:20px;
+      padding:60px;
+    }
+
+    .card {
+      background:rgba(255,255,255,0.05);
+      border-radius:20px;
+      padding:30px;
+      backdrop-filter:blur(20px);
+      transition:.3s;
+    }
+
+    .card:hover {
+      transform:translateY(-10px);
+      border:1px solid #3b82f6;
+    }
+
+    .card h3 {
+      margin-bottom:10px;
+    }
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🤖 Bot Dashboard</div>
+  <a href="/login" class="btn">Login</a>
+</nav>
+
+<section class="hero">
+  <h1>Ultimate Discord Bot</h1>
+  <p>Moderation • Games • Tickets • Everything you need</p>
+
+  <div class="cta">
+    <a href="/login" class="btn">Get Started 🚀</a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="card">
+    <h3>🔨 Moderation</h3>
+    <p>Ban, kick, mute and manage your server easily.</p>
+  </div>
+
+  <div class="card">
+    <h3>🎮 Games</h3>
+    <p>RPS, Trivia, Blackjack, TicTacToe & more.</p>
+  </div>
+
+  <div class="card">
+    <h3>🎫 Tickets</h3>
+    <p>Professional support system built-in.</p>
+  </div>
+
+  <div class="card">
+    <h3>⚙️ Auto Mod</h3>
+    <p>Keep your server clean automatically.</p>
+  </div>
+</section>
+
+</body>
+</html>

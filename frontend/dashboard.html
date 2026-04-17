@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+
+    body {
+      background: linear-gradient(135deg,#020617,#0f172a);
+      color:white;
+    }
+
+    nav {
+      display:flex;
+      justify-content:space-between;
+      padding:20px 50px;
+      border-bottom:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(20px);
+    }
+
+    .user {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .user img {
+      width:40px;
+      border-radius:50%;
+    }
+
+    .container {
+      padding:40px;
+    }
+
+    .title {
+      font-size:40px;
+      font-weight:900;
+      margin-bottom:30px;
+    }
+
+    .servers {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap:20px;
+    }
+
+    .server {
+      background:rgba(255,255,255,0.05);
+      padding:20px;
+      border-radius:20px;
+      backdrop-filter:blur(20px);
+      transition:.3s;
+      cursor:pointer;
+    }
+
+    .server:hover {
+      transform:scale(1.05);
+      border:1px solid #3b82f6;
+    }
+
+    .server img {
+      width:60px;
+      border-radius:15px;
+      margin-bottom:10px;
+    }
+
+    .logout {
+      background:#ef4444;
+      padding:8px 16px;
+      border-radius:10px;
+      text-decoration:none;
+      color:white;
+    }
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Dashboard</div>
+
+  <div class="user">
+    <img src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png">
+    <span>{{ user.username }}</span>
+    <a href="/logout" class="logout">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="title">Your Servers</div>
+
+  <div class="servers">
+    {% for guild in guilds %}
+    <div class="server">
+      {% if guild.icon %}
+      <img src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png">
+      {% endif %}
+      <h3>{{ guild.name }}</h3>
+      <p>ID: {{ guild.id }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+</body>
+</html>

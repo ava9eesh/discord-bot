@@ -314,178 +314,94 @@ async def setnick(ctx, member: discord.Member, *, nickname: str):
 async def serverinfo(ctx):
     """Display server information"""
     guild = ctx.guild
-    embed = discord.Embed(title=f"{guild.name} Info", color=discord.Color.blue())
+    embed = discord.Embed(title=f"📊 {guild.name}", color=discord.Color.blue())
     embed.set_thumbnail(url=guild.icon.url if guild.icon else None)
+    
     embed.add_field(name="Owner", value=guild.owner.mention)
+    embed.add_field(name="Created", value=guild.created_at.strftime("%b %d, %Y"))
     embed.add_field(name="Members", value=guild.member_count)
-    embed.add_field(name="Channels", value=len(guild.channels))
     embed.add_field(name="Roles", value=len(guild.roles))
-    embed.add_field(name="Created", value=guild.created_at.strftime("%Y-%m-%d"))
+    embed.add_field(name="Channels", value=len(guild.channels))
+    embed.add_field(name="Emojis", value=len(guild.emojis))
+    
     await ctx.send(embed=embed)
 
 @bot.hybrid_command(name="userinfo", description="Get user information")
 async def userinfo(ctx, member: discord.Member = None):
     """Display user information"""
     member = member or ctx.author
-    embed = discord.Embed(title=f"{member.name}'s Info", color=member.color)
+    embed = discord.Embed(title=f"👤 {member}", color=member.color)
     embed.set_thumbnail(url=member.display_avatar.url)
+    
     embed.add_field(name="ID", value=member.id)
     embed.add_field(name="Nickname", value=member.nick or "None")
-    embed.add_field(name="Joined Server", value=member.joined_at.strftime("%Y-%m-%d"))
-    embed.add_field(name="Account Created", value=member.created_at.strftime("%Y-%m-%d"))
-    embed.add_field(name="Roles", value=", ".join([r.mention for r in member.roles[1:]]) or "None")
+    embed.add_field(name="Status", value=str(member.status).title())
+    embed.add_field(name="Joined Server", value=member.joined_at.strftime("%b %d, %Y"))
+    embed.add_field(name="Account Created", value=member.created_at.strftime("%b %d, %Y"))
+    embed.add_field(name="Roles", value=len(member.roles) - 1)
+    
     await ctx.send(embed=embed)
 
 @bot.hybrid_command(name="avatar", description="Get user's avatar")
 async def avatar(ctx, member: discord.Member = None):
     """Display user's avatar"""
     member = member or ctx.author
-    embed = discord.Embed(title=f"{member.name}'s Avatar", color=member.color)
+    embed = discord.Embed(title=f"{member}'s Avatar", color=discord.Color.blue())
     embed.set_image(url=member.display_avatar.url)
     await ctx.send(embed=embed)
 
 @bot.hybrid_command(name="membercount", description="Get server member count")
 async def membercount(ctx):
-    """Display member count statistics"""
-    guild = ctx.guild
-    total = guild.member_count
-    bots = sum(1 for m in guild.members if m.bot)
-    humans = total - bots
-    
-    embed = discord.Embed(title="Member Count", color=discord.Color.green())
-    embed.add_field(name="Total", value=total)
-    embed.add_field(name="Humans", value=humans)
-    embed.add_field(name="Bots", value=bots)
-    await ctx.send(embed=embed)
+    """Display member count"""
+    await ctx.send(f"👥 This server has **{ctx.guild.member_count}** members!")
 
-# ==================== FUN COMMANDS ====================
+@bot.hybrid_command(name="ping", description="Check bot latency")
+async def ping(ctx):
+    """Check bot's latency"""
+    await ctx.send(f"🏓 Pong! Latency: {round(bot.latency * 1000)}ms")
 
-from discord.ui import Button, View
-
-class RPSView(View):
-    def __init__(self, user):
-        super().__init__()
-        self.user = user
-
-    async def interaction_check(self, interaction):
-        return interaction.user == self.user
-
-    async def play(self, interaction, choice):
-        bot_choice = random.choice(["rock", "paper", "scissors"])
-
-        if choice == bot_choice:
-            result = "🤝 It's a tie!"
-        elif (choice == "rock" and bot_choice == "scissors") or \
-             (choice == "paper" and bot_choice == "rock") or \
-             (choice == "scissors" and bot_choice == "paper"):
-            result = "🎉 You win!"
-        else:
-            result = "💀 You lose!"
-
-        await interaction.response.edit_message(
-            content=f"You chose **{choice}**\nBot chose **{bot_choice}**\n{result}",
-            view=None
-        )
-
-    @discord.ui.button(label="🪨 Rock", style=discord.ButtonStyle.primary)
-    async def rock(self, interaction, button):
-        await self.play(interaction, "rock")
-
-    @discord.ui.button(label="📄 Paper", style=discord.ButtonStyle.success)
-    async def paper(self, interaction, button):
-        await self.play(interaction, "paper")
-
-    @discord.ui.button(label="✂️ Scissors", style=discord.ButtonStyle.danger)
-    async def scissors(self, interaction, button):
-        await self.play(interaction, "scissors")
-
-
-@bot.hybrid_command(name="rps", description="Play Rock Paper Scissors")
-async def rps(ctx):
-    await ctx.send("Choose your move:", view=RPSView(ctx.author))
-
-@bot.hybrid_command(name="guess", description="Guess the number (1-100)")
-async def guess(ctx):
-    number = random.randint(1, 100)
-
-    await ctx.send("🎯 Guess a number between 1 and 100! You have 5 tries.")
-
-    def check(m):
-        return m.author == ctx.author and m.channel == ctx.channel
-
-    attempts = 5
-
-    while attempts > 0:
-        try:
-            msg = await bot.wait_for("message", timeout=30, check=check)
-            guess = int(msg.content)
-
-            if guess == number:
-                await ctx.send("🎉 Correct! You win!")
-                return
-            elif guess < number:
-                await ctx.send("📉 Too low!")
-            else:
-                await ctx.send("📈 Too high!")
-
-            attempts -= 1
-
-        except:
-            await ctx.send("⏰ Time's up!")
-            return
-
-    await ctx.send(f"💀 You lost! Number was {number}")
+# ==================== FUN COMMANDS (ORIGINAL) ====================
 
 @bot.hybrid_command(name="8ball", description="Ask the magic 8ball")
 async def eightball(ctx, *, question: str):
-    """Ask a question to the magic 8ball"""
+    """Ask the magic 8ball a question"""
     responses = [
-        "It is certain.", "It is decidedly so.", "Without a doubt.",
-        "Yes definitely.", "You may rely on it.", "As I see it, yes.",
-        "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.",
-        "Reply hazy, try again.", "Ask again later.", "Better not tell you now.",
-        "Cannot predict now.", "Concentrate and ask again.",
-        "Don't count on it.", "My reply is no.", "My sources say no.",
-        "Outlook not so good.", "Very doubtful."
+        "Yes", "No", "Maybe", "Definitely", "Absolutely not",
+        "Ask again later", "Cannot predict now", "Don't count on it",
+        "It is certain", "Without a doubt", "Outlook good"
     ]
     await ctx.send(f"🎱 {random.choice(responses)}")
 
 @bot.hybrid_command(name="roll", description="Roll a dice")
 async def roll(ctx, sides: int = 6):
     """Roll a dice with specified sides"""
-    result = random.randint(1, sides)
-    await ctx.send(f"🎲 You rolled a {result}!")
+    await ctx.send(f"🎲 You rolled a **{random.randint(1, sides)}**!")
 
 @bot.hybrid_command(name="coinflip", description="Flip a coin")
 async def coinflip(ctx):
     """Flip a coin"""
-    result = random.choice(["Heads", "Tails"])
-    await ctx.send(f"🪙 {result}!")
+    await ctx.send(f"🪙 {random.choice(['Heads', 'Tails'])}!")
 
 @bot.hybrid_command(name="meme", description="Get a random meme")
 async def meme(ctx):
-    """Fetch a random meme from Reddit"""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://meme-api.com/gimme') as response:
-                data = await response.json()
+    """Fetch a random meme"""
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://meme-api.com/gimme') as resp:
+            if resp.status == 200:
+                data = await resp.json()
                 embed = discord.Embed(title=data['title'], color=discord.Color.random())
                 embed.set_image(url=data['url'])
-                embed.set_footer(text=f"👍 {data['ups']} | r/{data['subreddit']}")
+                embed.set_footer(text=f"👍 {data['ups']} upvotes")
                 await ctx.send(embed=embed)
-    except:
-        await ctx.send("❌ Failed to fetch meme.")
 
 @bot.hybrid_command(name="joke", description="Get a random joke")
 async def joke(ctx):
     """Fetch a random joke"""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get('https://official-joke-api.appspot.com/random_joke') as response:
-                data = await response.json()
-                await ctx.send(f"😄 {data['setup']}\n\n||{data['punchline']}||")
-    except:
-        await ctx.send("❌ Failed to fetch joke.")
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://official-joke-api.appspot.com/random_joke') as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                await ctx.send(f"😂 {data['setup']}\n||{data['punchline']}||")
 
 @bot.hybrid_command(name="poll", description="Create a poll")
 async def poll(
@@ -495,34 +411,311 @@ async def poll(
     option2: str,
     option3: str = None,
     option4: str = None,
-    option5: str = None
+    option5: str = None,
+    option6: str = None,
+    option7: str = None,
+    option8: str = None,
+    option9: str = None,
+    option10: str = None
 ):
-    options = [option1, option2, option3, option4, option5]
+    """Create a poll with reactions"""
+
+    options = [
+        option1, option2, option3, option4, option5,
+        option6, option7, option8, option9, option10
+    ]
+
+    # remove None values
     options = [opt for opt in options if opt is not None]
 
-    embed = discord.Embed(title="📊 " + question, color=discord.Color.blue())
+    if len(options) < 2:
+        await ctx.send("❌ Please provide at least 2 options!")
+        return
 
-    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
+    embed = discord.Embed(
+        title="📊 Poll",
+        description=question,
+        color=discord.Color.blue()
+    )
 
-    description = ""
+    reactions = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+
     for i, option in enumerate(options):
-        description += f"\n{emojis[i]} {option}"
+        embed.add_field(
+            name=f"{reactions[i]} Option {i+1}",
+            value=option,
+            inline=False
+        )
 
-    embed.description = description
-    msg = await ctx.send(embed=embed)
+    message = await ctx.send(embed=embed)
 
     for i in range(len(options)):
-        await msg.add_reaction(emojis[i])
+        await message.add_reaction(reactions[i])
+
+@bot.hybrid_command(name="rps", description="Play Rock Paper Scissors")
+async def rps(ctx):
+    """Play Rock Paper Scissors with the bot"""
+    view = RPSView(ctx.author)
+    await ctx.send("🎮 **Rock Paper Scissors!** Choose your move:", view=view)
+
+# ==================== NEW FUN GAMES ====================
+
+@bot.hybrid_command(name="trivia", description="Play a trivia quiz game")
+async def trivia(ctx):
+    """Play trivia quiz"""
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://opentdb.com/api.php?amount=1&type=multiple') as resp:
+            if resp.status == 200:
+                data = await resp.json()
+                question_data = data['results'][0]
+                
+                question = question_data['question'].replace('&quot;', '"').replace('&#039;', "'")
+                correct = question_data['correct_answer'].replace('&quot;', '"').replace('&#039;', "'")
+                incorrect = [ans.replace('&quot;', '"').replace('&#039;', "'") for ans in question_data['incorrect_answers']]
+                
+                all_answers = incorrect + [correct]
+                random.shuffle(all_answers)
+                
+                embed = discord.Embed(
+                    title="🧠 Trivia Time!",
+                    description=question,
+                    color=discord.Color.purple()
+                )
+                embed.add_field(name="Category", value=question_data['category'])
+                embed.add_field(name="Difficulty", value=question_data['difficulty'].title())
+                
+                for i, answer in enumerate(all_answers, 1):
+                    embed.add_field(name=f"Option {i}", value=answer, inline=False)
+                
+                await ctx.send(embed=embed)
+                await ctx.send(f"💡 Type the number (1-4) of your answer! You have 15 seconds.")
+                
+                def check(m):
+                    return m.author == ctx.author and m.content.isdigit() and 1 <= int(m.content) <= 4
+                
+                try:
+                    msg = await bot.wait_for('message', check=check, timeout=15.0)
+                    user_answer = all_answers[int(msg.content) - 1]
+                    
+                    if user_answer == correct:
+                        await ctx.send(f"✅ **Correct!** The answer was: {correct}")
+                    else:
+                        await ctx.send(f"❌ **Wrong!** The correct answer was: {correct}")
+                except asyncio.TimeoutError:
+                    await ctx.send(f"⏰ **Time's up!** The correct answer was: {correct}")
+
+@bot.hybrid_command(name="guess", description="Guess the number game")
+async def guess(ctx, max_number: int = 100):
+    """Guess a number between 1 and max_number"""
+    number = random.randint(1, max_number)
+    attempts = 0
+    
+    await ctx.send(f"🎯 I'm thinking of a number between 1 and {max_number}. You have 5 attempts!")
+    
+    def check(m):
+        return m.author == ctx.author and m.content.isdigit()
+    
+    while attempts < 5:
+        try:
+            msg = await bot.wait_for('message', check=check, timeout=30.0)
+            guess = int(msg.content)
+            attempts += 1
+            
+            if guess == number:
+                await ctx.send(f"🎉 **Correct!** You guessed it in {attempts} attempt(s)!")
+                return
+            elif guess < number:
+                await ctx.send(f"📈 Higher! ({5 - attempts} attempts left)")
+            else:
+                await ctx.send(f"📉 Lower! ({5 - attempts} attempts left)")
+        except asyncio.TimeoutError:
+            await ctx.send(f"⏰ Time's up! The number was {number}")
+            return
+    
+    await ctx.send(f"💀 Game over! The number was {number}")
+
+@bot.hybrid_command(name="scramble", description="Word scramble game")
+async def scramble(ctx):
+    """Unscramble the word"""
+    words = [
+        "python", "discord", "computer", "keyboard", "monitor", "internet",
+        "programming", "developer", "algorithm", "database", "network", "server"
+    ]
+    
+    word = random.choice(words)
+    scrambled = ''.join(random.sample(word, len(word)))
+    
+    await ctx.send(f"🔤 **Unscramble this word:** `{scrambled}`\n⏰ You have 20 seconds!")
+    
+    def check(m):
+        return m.author == ctx.author
+    
+    try:
+        msg = await bot.wait_for('message', check=check, timeout=20.0)
+        
+        if msg.content.lower() == word:
+            await ctx.send(f"✅ **Correct!** The word was `{word}`")
+        else:
+            await ctx.send(f"❌ **Wrong!** The word was `{word}`")
+    except asyncio.TimeoutError:
+        await ctx.send(f"⏰ **Time's up!** The word was `{word}`")
+
+@bot.hybrid_command(name="truthordare", description="Play Truth or Dare")
+async def truthordare(ctx, choice: str = None):
+    """Play Truth or Dare"""
+    truths = [
+        "What's the most embarrassing thing you've done?",
+        "What's your biggest fear?",
+        "What's a secret you've never told anyone?",
+        "Who was your first crush?",
+        "What's the worst lie you've ever told?",
+        "What's your most embarrassing childhood memory?",
+    ]
+    
+    dares = [
+        "Send a funny selfie",
+        "Do 20 pushups and post a video",
+        "Change your nickname to 'Chicken Nugget' for 1 hour",
+        "Send a voice message singing your favorite song",
+        "Post an embarrassing photo from your camera roll",
+        "Do a handstand (or try to) and post a pic",
+    ]
+    
+    if choice and choice.lower() == "truth":
+        await ctx.send(f"🤔 **Truth:** {random.choice(truths)}")
+    elif choice and choice.lower() == "dare":
+        await ctx.send(f"🎯 **Dare:** {random.choice(dares)}")
+    else:
+        await ctx.send("❌ Please choose 'truth' or 'dare'! Example: `/truthordare truth`")
+
+@bot.hybrid_command(name="wouldyourather", description="Would You Rather game")
+async def wouldyourather(ctx):
+    """Play Would You Rather"""
+    questions = [
+        ("have the ability to fly", "be invisible"),
+        ("live in the past", "live in the future"),
+        ("have unlimited money", "have unlimited time"),
+        ("never use social media again", "never watch another movie/TV show"),
+        ("be able to talk to animals", "be able to speak all languages"),
+        ("have superhuman strength", "have superhuman intelligence"),
+        ("explore space", "explore the ocean"),
+        ("always be 10 minutes late", "always be 20 minutes early"),
+    ]
+    
+    option1, option2 = random.choice(questions)
+    
+    embed = discord.Embed(
+        title="🤔 Would You Rather...",
+        description=f"**A)** {option1}\n\n**B)** {option2}",
+        color=discord.Color.gold()
+    )
+    
+    msg = await ctx.send(embed=embed)
+    await msg.add_reaction("🇦")
+    await msg.add_reaction("🇧")
+
+@bot.hybrid_command(name="tictactoe", description="Play Tic Tac Toe")
+async def tictactoe(ctx, opponent: discord.Member):
+    """Play Tic Tac Toe with another member"""
+    if opponent.bot:
+        await ctx.send("❌ You can't play with a bot!")
+        return
+    
+    if opponent == ctx.author:
+        await ctx.send("❌ You can't play with yourself!")
+        return
+    
+    view = TicTacToeView(ctx.author, opponent)
+    await ctx.send(
+        f"**Tic Tac Toe**\n{ctx.author.mention} (X) vs {opponent.mention} (O)\n\nCurrent turn: {ctx.author.mention}",
+        view=view
+    )
+
+@bot.hybrid_command(name="blackjack", description="Play Blackjack")
+async def blackjack(ctx):
+    """Play a simple game of Blackjack"""
+    def card_value(card):
+        if card in ['J', 'Q', 'K']:
+            return 10
+        elif card == 'A':
+            return 11
+        else:
+            return int(card)
+    
+    def hand_value(hand):
+        value = sum(card_value(card) for card in hand)
+        # Adjust for Aces
+        aces = hand.count('A')
+        while value > 21 and aces:
+            value -= 10
+            aces -= 1
+        return value
+    
+    deck = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'] * 4
+    random.shuffle(deck)
+    
+    player_hand = [deck.pop(), deck.pop()]
+    dealer_hand = [deck.pop(), deck.pop()]
+    
+    embed = discord.Embed(title="🃏 Blackjack", color=discord.Color.green())
+    embed.add_field(name="Your Hand", value=f"{' '.join(player_hand)} (Value: {hand_value(player_hand)})")
+    embed.add_field(name="Dealer's Hand", value=f"{dealer_hand[0]} 🎴")
+    
+    await ctx.send(embed=embed)
+    await ctx.send("Type `hit` to draw a card or `stand` to stop!")
+    
+    def check(m):
+        return m.author == ctx.author and m.content.lower() in ['hit', 'stand']
+    
+    while hand_value(player_hand) < 21:
+        try:
+            msg = await bot.wait_for('message', check=check, timeout=30.0)
+            
+            if msg.content.lower() == 'stand':
+                break
+            
+            player_hand.append(deck.pop())
+            player_val = hand_value(player_hand)
+            
+            embed = discord.Embed(title="🃏 Blackjack", color=discord.Color.green())
+            embed.add_field(name="Your Hand", value=f"{' '.join(player_hand)} (Value: {player_val})")
+            embed.add_field(name="Dealer's Hand", value=f"{dealer_hand[0]} 🎴")
+            
+            await ctx.send(embed=embed)
+            
+            if player_val > 21:
+                await ctx.send("💀 **BUST!** You went over 21. Dealer wins!")
+                return
+        except asyncio.TimeoutError:
+            await ctx.send("⏰ Time's up! Dealer wins by default.")
+            return
+    
+    # Dealer's turn
+    while hand_value(dealer_hand) < 17:
+        dealer_hand.append(deck.pop())
+    
+    player_val = hand_value(player_hand)
+    dealer_val = hand_value(dealer_hand)
+    
+    final_embed = discord.Embed(title="🃏 Final Results", color=discord.Color.gold())
+    final_embed.add_field(name="Your Hand", value=f"{' '.join(player_hand)} (Value: {player_val})")
+    final_embed.add_field(name="Dealer's Hand", value=f"{' '.join(dealer_hand)} (Value: {dealer_val})")
+    
+    if dealer_val > 21:
+        final_embed.add_field(name="Result", value="🎉 **YOU WIN!** Dealer busted!", inline=False)
+    elif player_val > dealer_val:
+        final_embed.add_field(name="Result", value="🎉 **YOU WIN!**", inline=False)
+    elif player_val == dealer_val:
+        final_embed.add_field(name="Result", value="🤝 **TIE!**", inline=False)
+    else:
+        final_embed.add_field(name="Result", value="💀 **DEALER WINS!**", inline=False)
+    
+    await ctx.send(embed=final_embed)
 
 # ==================== UTILITY COMMANDS ====================
 
-@bot.hybrid_command(name="ping", description="Check bot latency")
-async def ping(ctx):
-    """Check the bot's latency"""
-    await ctx.send(f"🏓 Pong! Latency: {round(bot.latency * 1000)}ms")
-
 @bot.hybrid_command(name="announce", description="Make an announcement")
-@commands.has_permissions(manage_messages=True)
+@commands.has_permissions(administrator=True)
 async def announce(ctx, channel: discord.TextChannel, *, message: str):
     """Send an announcement to a channel"""
     embed = discord.Embed(
@@ -532,7 +725,7 @@ async def announce(ctx, channel: discord.TextChannel, *, message: str):
     )
     embed.set_footer(text=f"Announced by {ctx.author}")
     await channel.send(embed=embed)
-    await ctx.send(f"✅ Announcement sent to {channel.mention}")
+    await ctx.send("✅ Announcement sent!")
 
 @bot.hybrid_command(name="say", description="Make the bot say something")
 @commands.has_permissions(manage_messages=True)
@@ -543,15 +736,15 @@ async def say(ctx, *, message: str):
 
 @bot.hybrid_command(name="embed", description="Create a custom embed")
 @commands.has_permissions(manage_messages=True)
-async def embed_create(ctx, title: str, *, description: str):
-    """Create a custom embed"""
+async def embed_command(ctx, title: str, *, description: str):
+    """Create a custom embed message"""
     embed = discord.Embed(title=title, description=description, color=discord.Color.blue())
     await ctx.send(embed=embed)
 
 @bot.hybrid_command(name="remind", description="Set a reminder")
 async def remind(ctx, time: int, *, reminder: str):
-    """Set a reminder (time in minutes)"""
-    await ctx.send(f"⏰ I'll remind you in {time} minutes!")
+    """Set a reminder in minutes"""
+    await ctx.send(f"⏰ I'll remind you in {time} minute(s)!")
     await asyncio.sleep(time * 60)
     await ctx.send(f"{ctx.author.mention} Reminder: {reminder}")
 
@@ -696,8 +889,8 @@ async def help_command(ctx):
     )
     
     embed.add_field(
-        name="🎮 Fun",
-        value="`8ball`, `roll`, `coinflip`, `meme`, `joke`, `poll`",
+        name="🎮 Fun & Games",
+        value="`8ball`, `roll`, `coinflip`, `meme`, `joke`, `poll`, `rps`, `trivia`, `guess`, `scramble`, `truthordare`, `wouldyourather`, `tictactoe`, `blackjack`",
         inline=False
     )
     
@@ -736,15 +929,17 @@ async def on_ready():
 
 @bot.event
 async def on_command_error(ctx, error):
-    """Global error handler"""
-    if isinstance(error, commands.MissingPermissions):
-        await ctx.send("❌ You don't have permission to use this command!")
-    elif isinstance(error, commands.MemberNotFound):
-        await ctx.send("❌ Member not found!")
-    elif isinstance(error, commands.MissingRequiredArgument):
-        await ctx.send(f"❌ Missing required argument: {error.param}")
-    else:
-        await ctx.send(f"❌ An error occurred: {error}")
+    try:
+        if isinstance(error, commands.MissingPermissions):
+            await ctx.reply("❌ You don't have permission!", ephemeral=True)
+        elif isinstance(error, commands.MemberNotFound):
+            await ctx.reply("❌ Member not found!", ephemeral=True)
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.reply(f"❌ Missing argument: {error.param}", ephemeral=True)
+        else:
+            await ctx.reply(f"❌ Error: {error}", ephemeral=True)
+    except:
+        pass  # prevents crash if interaction expired
 
 # ==================== RUN BOT ====================
 
