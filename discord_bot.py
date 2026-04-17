@@ -8,6 +8,125 @@ import os
 from datetime import datetime, timedelta
 import aiohttp
 
+from discord.ui import Button, View
+
+# ==================== GAME VIEWS ====================
+
+class RPSView(View):
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
+    async def interaction_check(self, interaction):
+        return interaction.user == self.user
+
+    async def play(self, interaction, choice):
+        bot_choice = random.choice(["rock", "paper", "scissors"])
+
+        if choice == bot_choice:
+            result = "🤝 It's a tie!"
+        elif (choice == "rock" and bot_choice == "scissors") or \
+             (choice == "paper" and bot_choice == "rock") or \
+             (choice == "scissors" and bot_choice == "paper"):
+            result = "🎉 You win!"
+        else:
+            result = "💀 You lose!"
+
+        await interaction.response.edit_message(
+            content=f"You chose **{choice}**\nBot chose **{bot_choice}**\n{result}",
+            view=None
+        )
+
+    @discord.ui.button(label="🪨 Rock", style=discord.ButtonStyle.primary)
+    async def rock(self, interaction, button):
+        await self.play(interaction, "rock")
+
+    @discord.ui.button(label="📄 Paper", style=discord.ButtonStyle.success)
+    async def paper(self, interaction, button):
+        await self.play(interaction, "paper")
+
+    @discord.ui.button(label="✂️ Scissors", style=discord.ButtonStyle.danger)
+    async def scissors(self, interaction, button):
+        await self.play(interaction, "scissors")
+
+
+class TicTacToeButton(Button):
+    def __init__(self, x, y):
+        super().__init__(style=discord.ButtonStyle.secondary, label='\u200b', row=y)
+        self.x = x
+        self.y = y
+
+    async def callback(self, interaction):
+        view: TicTacToeView = self.view
+        
+        if interaction.user != view.current_player:
+            await interaction.response.send_message("❌ It's not your turn!", ephemeral=True)
+            return
+
+        if view.board[self.x][self.y] != 0:
+            await interaction.response.send_message("❌ That spot is taken!", ephemeral=True)
+            return
+
+        view.board[self.x][self.y] = view.current_marker
+        self.label = view.current_marker
+        self.style = discord.ButtonStyle.success if view.current_marker == "X" else discord.ButtonStyle.danger
+        self.disabled = True
+
+        winner = view.check_winner()
+        if winner:
+            for child in view.children:
+                child.disabled = True
+            await interaction.response.edit_message(content=f"🎉 {view.current_player.mention} wins!", view=view)
+            view.stop()
+        elif view.is_board_full():
+            for child in view.children:
+                child.disabled = True
+            await interaction.response.edit_message(content="🤝 It's a tie!", view=view)
+            view.stop()
+        else:
+            view.current_player = view.player2 if view.current_player == view.player1 else view.player1
+            view.current_marker = "O" if view.current_marker == "X" else "X"
+            await interaction.response.edit_message(
+                content=f"**Tic Tac Toe**\n{view.player1.mention} (X) vs {view.player2.mention} (O)\n\nCurrent turn: {view.current_player.mention}",
+                view=view
+            )
+
+
+class TicTacToeView(View):
+    def __init__(self, player1, player2):
+        super().__init__()
+        self.player1 = player1
+        self.player2 = player2
+        self.current_player = player1
+        self.current_marker = "X"
+        self.board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+
+        for x in range(3):
+            for y in range(3):
+                self.add_item(TicTacToeButton(x, y))
+
+    def check_winner(self):
+        # Check rows, columns, and diagonals
+        for i in range(3):
+            if self.board[i][0] == self.board[i][1] == self.board[i][2] != 0:
+                return True
+            if self.board[0][i] == self.board[1][i] == self.board[2][i] != 0:
+                return True
+        
+        if self.board[0][0] == self.board[1][1] == self.board[2][2] != 0:
+            return True
+        if self.board[0][2] == self.board[1][1] == self.board[2][0] != 0:
+            return True
+        
+        return False
+
+    def is_board_full(self):
+        for row in self.board:
+            if 0 in row:
+                return False
+        return True
+
+
 # Bot setup with all intents
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents, help_command=None)
@@ -241,6 +360,82 @@ async def membercount(ctx):
 
 # ==================== FUN COMMANDS ====================
 
+from discord.ui import Button, View
+
+class RPSView(View):
+    def __init__(self, user):
+        super().__init__()
+        self.user = user
+
+    async def interaction_check(self, interaction):
+        return interaction.user == self.user
+
+    async def play(self, interaction, choice):
+        bot_choice = random.choice(["rock", "paper", "scissors"])
+
+        if choice == bot_choice:
+            result = "🤝 It's a tie!"
+        elif (choice == "rock" and bot_choice == "scissors") or \
+             (choice == "paper" and bot_choice == "rock") or \
+             (choice == "scissors" and bot_choice == "paper"):
+            result = "🎉 You win!"
+        else:
+            result = "💀 You lose!"
+
+        await interaction.response.edit_message(
+            content=f"You chose **{choice}**\nBot chose **{bot_choice}**\n{result}",
+            view=None
+        )
+
+    @discord.ui.button(label="🪨 Rock", style=discord.ButtonStyle.primary)
+    async def rock(self, interaction, button):
+        await self.play(interaction, "rock")
+
+    @discord.ui.button(label="📄 Paper", style=discord.ButtonStyle.success)
+    async def paper(self, interaction, button):
+        await self.play(interaction, "paper")
+
+    @discord.ui.button(label="✂️ Scissors", style=discord.ButtonStyle.danger)
+    async def scissors(self, interaction, button):
+        await self.play(interaction, "scissors")
+
+
+@bot.hybrid_command(name="rps", description="Play Rock Paper Scissors")
+async def rps(ctx):
+    await ctx.send("Choose your move:", view=RPSView(ctx.author))
+
+@bot.hybrid_command(name="guess", description="Guess the number (1-100)")
+async def guess(ctx):
+    number = random.randint(1, 100)
+
+    await ctx.send("🎯 Guess a number between 1 and 100! You have 5 tries.")
+
+    def check(m):
+        return m.author == ctx.author and m.channel == ctx.channel
+
+    attempts = 5
+
+    while attempts > 0:
+        try:
+            msg = await bot.wait_for("message", timeout=30, check=check)
+            guess = int(msg.content)
+
+            if guess == number:
+                await ctx.send("🎉 Correct! You win!")
+                return
+            elif guess < number:
+                await ctx.send("📉 Too low!")
+            else:
+                await ctx.send("📈 Too high!")
+
+            attempts -= 1
+
+        except:
+            await ctx.send("⏰ Time's up!")
+            return
+
+    await ctx.send(f"💀 You lost! Number was {number}")
+
 @bot.hybrid_command(name="8ball", description="Ask the magic 8ball")
 async def eightball(ctx, *, question: str):
     """Ask a question to the magic 8ball"""
@@ -387,17 +582,6 @@ async def on_member_remove(member):
             color=discord.Color.red()
         )
         await channel.send(embed=embed)
-
-# ==================== LEVELING SYSTEM ====================
-
-@bot.event
-async def on_message(message):
-    """Award XP for messages"""
-    if message.author.bot:
-        return
-    
-    # Process commands first
-    await bot.process_commands(message)
 
 # ==================== TICKET SYSTEM ====================
 
