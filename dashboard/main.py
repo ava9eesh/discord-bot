@@ -1,9 +1,9 @@
 from flask import Flask, redirect, request, session, url_for, render_template
 import requests
 import os
+import json
 from dotenv import load_dotenv
 
-# Load env (Render uses its own env system, this still works locally)
 load_dotenv()
 
 app = Flask(__name__, template_folder="templates")
@@ -12,8 +12,28 @@ app.secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
+BOT_TOKEN = os.getenv("DISCORD_TOKEN")
 
 DISCORD_API = "https://discord.com/api"
+
+def bot_in_guild(guild_id):
+    url = f"{DISCORD_API}/guilds/{guild_id}/members/@me"
+    headers = {"Authorization": f"Bot {BOT_TOKEN}"}
+    r = requests.get(url, headers=headers)
+    return r.status_code == 200
+
+def load_data():
+    try:
+        with open("dashboard/data.json") as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_prefix(guild_id, prefix):
+    data = load_data()
+    data[guild_id] = prefix
+    with open("dashboard/data.json", "w") as f:
+        json.dump(data, f)
 
 @app.route("/")
 def home():
@@ -21,9 +41,6 @@ def home():
 
 @app.route("/login")
 def login():
-    if not CLIENT_ID or not REDIRECT_URI:
-        return "Missing CLIENT_ID or REDIRECT_URI", 500
-
     return redirect(
         f"{DISCORD_API}/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20guilds"
     )
@@ -31,9 +48,6 @@ def login():
 @app.route("/callback")
 def callback():
     code = request.args.get("code")
-
-    if not code:
-        return "No code provided", 400
 
     data = {
         "client_id": CLIENT_ID,
@@ -47,9 +61,6 @@ def callback():
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     r = requests.post(f"{DISCORD_API}/oauth2/token", data=data, headers=headers)
 
-    if r.status_code != 200:
-        return f"Token error: {r.text}", 500
-
     token = r.json().get("access_token")
     session["token"] = token
 
@@ -58,7 +69,6 @@ def callback():
 @app.route("/dashboard")
 def dashboard():
     token = session.get("token")
-
     if not token:
         return redirect(url_for("login"))
 
@@ -67,4 +77,24 @@ def dashboard():
     user = requests.get(f"{DISCORD_API}/users/@me", headers=headers).json()
     guilds = requests.get(f"{DISCORD_API}/users/@me/guilds", headers=headers).json()
 
-    return render_template("dashboard.html", user=user, guilds=guilds)
+    managed = []
+    invite = []
+
+    for g in guilds:
+        if bot_in_guild(g["id"]):
+            managed.append(g)
+        else:
+            invite.append(g)
+
+    return render_template("dashboard.html", user=user, managed=managed, invite=invite)
+
+@app.route("/server/<guild_id>", methods=["GET", "POST"])
+def server_panel(guild_id):
+    if request.method == "POST":
+        prefix = request.form.get("prefix")
+        save_prefix(guild_id, prefix)
+
+    data = load_data()
+    current_prefix = data.get(guild_id, "!")
+
+    return render_template("server.html", guild_id=guild_id, prefix=current_prefix)

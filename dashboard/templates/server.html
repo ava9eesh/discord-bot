@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Server Panel</title>
+
+<style>
+body {
+  background:#020617;
+  color:white;
+  font-family:Inter;
+  padding:40px;
+}
+
+.box {
+  background:#0f172a;
+  padding:20px;
+  border-radius:15px;
+  margin-bottom:20px;
+}
+
+input {
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin-top:10px;
+}
+
+button {
+  padding:10px 20px;
+  background:#3b82f6;
+  color:white;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>⚙️ Server Settings</h1>
+
+<div class="box">
+  <h3>Prefix</h3>
+  <form method="POST">
+    <input type="text" name="prefix" value="{{ prefix }}">
+    <br><br>
+    <button>Save</button>
+  </form>
+</div>
+
+</body>
+</html>

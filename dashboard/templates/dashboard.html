@@ -1,116 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
-    body {
-      background: linear-gradient(135deg,#020617,#0f172a);
-      color:white;
-    }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
 
-    nav {
-      display:flex;
-      justify-content:space-between;
-      padding:20px 50px;
-      border-bottom:1px solid rgba(255,255,255,0.1);
-    }
+body {
+  background: linear-gradient(135deg,#020617,#0f172a);
+  color:white;
+  display:flex;
+}
 
-    .nav-left {
-      font-size:20px;
-      font-weight:900;
-    }
+/* SIDEBAR */
+.sidebar {
+  width:260px;
+  height:100vh;
+  background:rgba(255,255,255,0.05);
+  backdrop-filter:blur(20px);
+  padding:25px;
+}
 
-    .nav-right {
-      display:flex;
-      align-items:center;
-      gap:15px;
-    }
+.sidebar h2 {
+  font-size:22px;
+  margin-bottom:30px;
+  font-weight:800;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  -webkit-background-clip:text;
+  color:transparent;
+}
 
-    .btn {
-      background:linear-gradient(90deg,#3b82f6,#a855f7);
-      padding:8px 16px;
-      border-radius:10px;
-      text-decoration:none;
-      color:white;
-      font-weight:600;
-    }
+.nav a {
+  display:block;
+  padding:12px;
+  border-radius:10px;
+  text-decoration:none;
+  color:#cbd5f5;
+  margin-bottom:10px;
+  transition:.2s;
+}
 
-    .logout {
-      background:#ef4444;
-    }
+.nav a:hover {
+  background:#3b82f6;
+  color:white;
+}
 
-    .container {
-      padding:40px;
-    }
+/* MAIN */
+.main {
+  flex:1;
+  padding:40px;
+}
 
-    .title {
-      font-size:40px;
-      font-weight:900;
-      margin-bottom:30px;
-    }
+.topbar {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:30px;
+}
 
-    .servers {
-      display:grid;
-      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-      gap:20px;
-    }
+.user {
+  font-weight:600;
+}
 
-    .server {
-      background:rgba(255,255,255,0.05);
-      padding:20px;
-      border-radius:20px;
-      transition:.3s;
-    }
+/* CARDS */
+.grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+  gap:20px;
+}
 
-    .server:hover {
-      transform:scale(1.05);
-      border:1px solid #3b82f6;
-    }
+.card {
+  background:rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:20px;
+  transition:.3s;
+  backdrop-filter:blur(20px);
+}
 
-    .server img {
-      width:60px;
-      border-radius:15px;
-      margin-bottom:10px;
-    }
+.card:hover {
+  transform:translateY(-8px);
+  border:1px solid #3b82f6;
+}
 
-  </style>
+.card h3 {
+  margin-bottom:10px;
+}
+
+.btn {
+  display:inline-block;
+  margin-top:10px;
+  padding:8px 14px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  color:white;
+  text-decoration:none;
+  font-size:14px;
+}
+
+.section-title {
+  margin:30px 0 15px;
+  font-size:20px;
+  font-weight:700;
+}
+</style>
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-left">Dashboard</div>
-
-  <div class="nav-right">
-    <span>{{ user.username }}</span>
-
-    <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot"
-       class="btn">
-       Invite Bot
-    </a>
-
-    <a href="/login" class="btn logout">Logout</a>
+<div class="sidebar">
+  <h2>🤖 Dashboard</h2>
+  <div class="nav">
+    <a href="#">🏠 Home</a>
+    <a href="#">⚙️ Settings</a>
+    <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot">➕ Invite Bot</a>
   </div>
-</nav>
+</div>
 
-<div class="container">
-  <div class="title">Your Servers</div>
+<div class="main">
 
-  <div class="servers">
-    {% for guild in guilds %}
-    <div class="server">
-      {% if guild.icon %}
-      <img src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png">
-      {% endif %}
-      <h3>{{ guild.name }}</h3>
+  <div class="topbar">
+    <h1>Servers</h1>
+    <div class="user">{{ user.username }}</div>
+  </div>
+
+  <div class="section-title">🟢 Manage Servers</div>
+  <div class="grid">
+    {% for g in managed %}
+    <div class="card">
+      <h3>{{ g.name }}</h3>
+      <a href="/server/{{ g.id }}" class="btn">Manage</a>
     </div>
     {% endfor %}
   </div>
+
+  <div class="section-title">➕ Invite Bot</div>
+  <div class="grid">
+    {% for g in invite %}
+    <div class="card">
+      <h3>{{ g.name }}</h3>
+      <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot" class="btn">
+        Invite
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
 </div>
 
 </body>

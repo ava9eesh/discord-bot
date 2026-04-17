@@ -1,104 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Discord Bot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700;900&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<title>Bot Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
-    body {
-      background: linear-gradient(135deg, #0f172a, #020617);
-      color: white;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
 
-    nav {
-      display:flex;
-      justify-content:space-between;
-      padding:20px 60px;
-      border-bottom:1px solid rgba(255,255,255,0.1);
-    }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter',sans-serif; }
 
-    .logo {
-      font-size:24px;
-      font-weight:900;
-      background:linear-gradient(90deg,#3b82f6,#a855f7);
-      -webkit-background-clip:text;
-      color:transparent;
-    }
+body {
+  background: linear-gradient(135deg,#020617,#0f172a);
+  color:white;
+}
 
-    .nav-buttons {
-      display:flex;
-      gap:10px;
-    }
+/* NAVBAR */
+nav {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 50px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
 
-    .btn {
-      background:linear-gradient(90deg,#3b82f6,#a855f7);
-      padding:10px 20px;
-      border-radius:12px;
-      text-decoration:none;
-      color:white;
-      font-weight:600;
-      transition:.2s;
-    }
+.logo {
+  font-size:22px;
+  font-weight:900;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  -webkit-background-clip:text;
+  color:transparent;
+}
 
-    .btn:hover { transform:scale(1.05); }
+.nav-buttons {
+  display:flex;
+  gap:10px;
+}
 
-    .hero {
-      text-align:center;
-      padding:120px 20px;
-    }
+/* BUTTONS */
+.btn {
+  padding:10px 18px;
+  border-radius:12px;
+  text-decoration:none;
+  color:white;
+  font-weight:600;
+  background:linear-gradient(90deg,#3b82f6,#a855f7);
+  transition:.2s;
+}
 
-    .hero h1 {
-      font-size:60px;
-      font-weight:900;
-      background:linear-gradient(90deg,#3b82f6,#a855f7,#ec4899);
-      -webkit-background-clip:text;
-      color:transparent;
-    }
+.btn:hover {
+  transform:scale(1.05);
+}
 
-    .hero p {
-      margin-top:20px;
-      color:#94a3b8;
-      font-size:18px;
-    }
+/* HERO */
+.hero {
+  text-align:center;
+  padding:120px 20px;
+}
 
-    .cta {
-      margin-top:40px;
-      display:flex;
-      justify-content:center;
-      gap:15px;
-    }
+.hero h1 {
+  font-size:60px;
+  font-weight:900;
+  background:linear-gradient(90deg,#3b82f6,#a855f7,#ec4899);
+  -webkit-background-clip:text;
+  color:transparent;
+}
 
-  </style>
+.hero p {
+  margin-top:20px;
+  color:#94a3b8;
+  font-size:18px;
+}
+
+.cta {
+  margin-top:40px;
+  display:flex;
+  justify-content:center;
+  gap:15px;
+}
+
+/* FEATURES */
+.features {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  padding:60px;
+}
+
+.card {
+  background:rgba(255,255,255,0.05);
+  padding:25px;
+  border-radius:20px;
+  transition:.3s;
+}
+
+.card:hover {
+  transform:translateY(-8px);
+  border:1px solid #3b82f6;
+}
+</style>
 </head>
+
 <body>
 
 <nav>
-  <div class="logo">🤖 Bot Dashboard</div>
+  <div class="logo">🤖 Bot</div>
 
   <div class="nav-buttons">
     <a href="/login" class="btn">Login</a>
 
     <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot"
        class="btn">
-       Invite Bot 🚀
+       Invite
     </a>
   </div>
 </nav>
 
 <section class="hero">
   <h1>Ultimate Discord Bot</h1>
-  <p>Moderation • Games • Tickets • Everything you need</p>
+  <p>Moderation • Games • Dashboard • Control everything</p>
 
   <div class="cta">
-    <a href="/login" class="btn">Login</a>
+    <a href="/login" class="btn">Open Dashboard</a>
 
     <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot"
        class="btn">
-       Invite Bot 🤖
+       Invite Bot
     </a>
+  </div>
+</section>
+
+<section class="features">
+  <div class="card">
+    <h3>⚙️ Full Control</h3>
+    <p>Manage your server directly from the dashboard.</p>
+  </div>
+
+  <div class="card">
+    <h3>🎮 Fun Commands</h3>
+    <p>Games, interactions and more.</p>
+  </div>
+
+  <div class="card">
+    <h3>🔨 Moderation</h3>
+    <p>Ban, kick, mute with ease.</p>
+  </div>
+
+  <div class="card">
+    <h3>📊 Dashboard</h3>
+    <p>Clean UI to control everything.</p>
   </div>
 </section>
 
