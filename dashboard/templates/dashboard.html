@@ -19,18 +19,30 @@
       justify-content:space-between;
       padding:20px 50px;
       border-bottom:1px solid rgba(255,255,255,0.1);
-      backdrop-filter:blur(20px);
     }
 
-    .user {
+    .nav-left {
+      font-size:20px;
+      font-weight:900;
+    }
+
+    .nav-right {
       display:flex;
       align-items:center;
-      gap:10px;
+      gap:15px;
     }
 
-    .user img {
-      width:40px;
-      border-radius:50%;
+    .btn {
+      background:linear-gradient(90deg,#3b82f6,#a855f7);
+      padding:8px 16px;
+      border-radius:10px;
+      text-decoration:none;
+      color:white;
+      font-weight:600;
+    }
+
+    .logout {
+      background:#ef4444;
     }
 
     .container {
@@ -53,9 +65,7 @@
       background:rgba(255,255,255,0.05);
       padding:20px;
       border-radius:20px;
-      backdrop-filter:blur(20px);
       transition:.3s;
-      cursor:pointer;
     }
 
     .server:hover {
@@ -69,25 +79,22 @@
       margin-bottom:10px;
     }
 
-    .logout {
-      background:#ef4444;
-      padding:8px 16px;
-      border-radius:10px;
-      text-decoration:none;
-      color:white;
-    }
-
   </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo">Dashboard</div>
+  <div class="nav-left">Dashboard</div>
 
-  <div class="user">
-    <img src="https://cdn.discordapp.com/avatars/{{ user.id }}/{{ user.avatar }}.png">
+  <div class="nav-right">
     <span>{{ user.username }}</span>
-    <a href="/logout" class="logout">Logout</a>
+
+    <a href="https://discord.com/oauth2/authorize?client_id=1493636740768993361&permissions=8&integration_type=0&scope=applications.commands+bot"
+       class="btn">
+       Invite Bot
+    </a>
+
+    <a href="/login" class="btn logout">Logout</a>
   </div>
 </nav>
 
@@ -101,7 +108,6 @@
       <img src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png">
       {% endif %}
       <h3>{{ guild.name }}</h3>
-      <p>ID: {{ guild.id }}</p>
     </div>
     {% endfor %}
   </div>
