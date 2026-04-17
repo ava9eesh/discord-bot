@@ -1,13 +1,12 @@
-from flask import Flask, app, redirect, request, session, url_for, render_template
+from flask import Flask, redirect, request, session, url_for, render_template
 import requests
 import os
 from dotenv import load_dotenv
 
-from pathlib import Path
-load_dotenv(dotenv_path=Path("../.env"))
+# load env normally
+load_dotenv()
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -60,6 +59,3 @@ def dashboard():
     guilds = requests.get(f"{DISCORD_API}/users/@me/guilds", headers=headers).json()
 
     return render_template("dashboard.html", user=user, guilds=guilds)
-
-if __name__ == "__main__":
-    app.run(debug=True)
