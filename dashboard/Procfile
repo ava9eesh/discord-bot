@@ -1,1 +1,1 @@
-gunicorn dashboard.app:app
+gunicorn dashboard.main:app
