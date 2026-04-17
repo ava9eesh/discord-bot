@@ -3,11 +3,11 @@ import requests
 import os
 from dotenv import load_dotenv
 
-# load env normally
+# Load env (Render uses its own env system, this still works locally)
 load_dotenv()
 
-app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app = Flask(__name__, template_folder="templates")
+app.secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
@@ -21,6 +21,9 @@ def home():
 
 @app.route("/login")
 def login():
+    if not CLIENT_ID or not REDIRECT_URI:
+        return "Missing CLIENT_ID or REDIRECT_URI", 500
+
     return redirect(
         f"{DISCORD_API}/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20guilds"
     )
@@ -28,6 +31,9 @@ def login():
 @app.route("/callback")
 def callback():
     code = request.args.get("code")
+
+    if not code:
+        return "No code provided", 400
 
     data = {
         "client_id": CLIENT_ID,
@@ -40,8 +46,11 @@ def callback():
 
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     r = requests.post(f"{DISCORD_API}/oauth2/token", data=data, headers=headers)
-    token = r.json().get("access_token")
 
+    if r.status_code != 200:
+        return f"Token error: {r.text}", 500
+
+    token = r.json().get("access_token")
     session["token"] = token
 
     return redirect(url_for("dashboard"))
