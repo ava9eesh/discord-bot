@@ -75,24 +75,29 @@ def callback():
             "Content-Type": "application/x-www-form-urlencoded"
         }
 
-        # STEP 1: GET TOKEN
+        # 🔥 STEP 1: GET TOKEN
         r = requests.post(f"{DISCORD_API}/oauth2/token", data=data, headers=headers)
-        token_json = r.json()
+
+        # 🔥 SAFE JSON PARSE (FIX)
+        try:
+            token_json = r.json()
+        except:
+            return f"❌ RAW RESPONSE:\n{r.text}"
 
         print("TOKEN RESPONSE:", token_json)
 
         if "access_token" not in token_json:
-            return f"❌ Token Error: {token_json}"
+            return f"❌ TOKEN ERROR:\n{token_json}"
 
         access_token = token_json["access_token"]
 
-        # STEP 2: GET USER
+        # 🔥 STEP 2: GET USER
         user = requests.get(
             f"{DISCORD_API}/users/@me",
             headers={"Authorization": f"Bearer {access_token}"}
         ).json()
 
-        # STEP 3: GET GUILDS
+        # 🔥 STEP 3: GET GUILDS
         guilds = requests.get(
             f"{DISCORD_API}/users/@me/guilds",
             headers={"Authorization": f"Bearer {access_token}"}
@@ -106,7 +111,7 @@ def callback():
         return redirect("/dashboard")
 
     except Exception as e:
-        return f"💥 CALLBACK ERROR: {str(e)}"
+        return f"💥 CALLBACK ERROR:\n{str(e)}"
 
 # ================= DASHBOARD =================
 
