@@ -1,64 +1,889 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Server</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server Settings - {{ server_name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
 
 <style>
-body{
-background:#020617;
-color:white;
-font-family:Inter;
-padding:40px;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-.card{
-background:#1e293b;
-padding:20px;
-border-radius:15px;
-margin-bottom:20px;
+:root {
+    --bg-primary: #0a0118;
+    --bg-secondary: #150328;
+    --accent-1: #6366f1;
+    --accent-2: #ec4899;
+    --accent-3: #8b5cf6;
+    --text-primary: #ffffff;
+    --text-secondary: #a78bfa;
+    --glass-bg: rgba(139, 92, 246, 0.05);
+    --glass-border: rgba(139, 92, 246, 0.2);
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
 }
 
-input{
-padding:10px;
-border:none;
-border-radius:8px;
+body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    padding: 0;
+    overflow-x: hidden;
 }
 
-button{
-padding:10px;
-background:#3b82f6;
-color:white;
-border:none;
-border-radius:8px;
-cursor:pointer;
+/* Background */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1), transparent),
+                radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1), transparent);
+}
+
+/* Header */
+.header {
+    background: rgba(15, 3, 40, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 25px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.breadcrumb a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.breadcrumb a:hover {
+    color: var(--text-primary);
+}
+
+.breadcrumb span {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: rgba(139, 92, 246, 0.2);
+}
+
+/* Container */
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 60px;
+}
+
+/* Server Header */
+.server-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 50px;
+    padding: 40px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
+}
+
+.server-icon-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    flex-shrink: 0;
+}
+
+.server-details h1 {
+    font-size: 36px;
+    font-weight: 900;
+    margin-bottom: 10px;
+}
+
+.server-meta {
+    display: flex;
+    gap: 30px;
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.server-meta span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Settings Layout */
+.settings-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 40px;
+}
+
+/* Settings Navigation */
+.settings-nav {
+    position: sticky;
+    top: 120px;
+    height: fit-content;
+}
+
+.settings-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.settings-nav a:hover,
+.settings-nav a.active {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--glass-border);
+}
+
+.settings-nav a span:first-child {
+    font-size: 20px;
+}
+
+/* Settings Content */
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.settings-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 35px;
+}
+
+.section-header {
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.section-header p {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+/* Form Controls */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.form-description {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(15, 3, 40, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'Outfit', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Toggle Switch */
+.toggle-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: rgba(15, 3, 40, 0.4);
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.toggle-info h4 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.toggle-info p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.toggle-switch {
+    position: relative;
+    width: 60px;
+    height: 32px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 50px;
+    transition: 0.4s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    border-color: var(--accent-1);
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(28px);
+    background: white;
+}
+
+/* Select Dropdown */
+.form-select {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(15, 3, 40, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 15px;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent-1);
+}
+
+/* Checkbox List */
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    background: rgba(15, 3, 40, 0.4);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.checkbox-item:hover {
+    background: rgba(15, 3, 40, 0.6);
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent-1);
+    cursor: pointer;
+}
+
+.checkbox-item label {
+    flex: 1;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* Stats Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(15, 3, 40, 0.6);
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Alert Messages */
+.alert {
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--success);
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--warning);
+}
+
+.alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--danger);
+}
+
+/* Save Bar */
+.save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15, 3, 40, 0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+}
+
+.save-bar.active {
+    transform: translateY(0);
+}
+
+.save-bar-text {
+    color: var(--text-secondary);
+}
+
+.save-bar-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .settings-nav {
+        position: relative;
+        top: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+    
+    .container {
+        padding: 30px 20px;
+    }
+    
+    .header {
+        padding: 20px 30px;
+    }
 }
 </style>
 </head>
-
 <body>
 
-<h1>⚙️ Server Panel</h1>
+<div class="bg-animation"></div>
 
-<form method="POST">
+<!-- Header -->
+<header class="header">
+    <div class="breadcrumb">
+        <a href="/dashboard">Dashboard</a>
+        <span>→</span>
+        <span>Server Settings</span>
+    </div>
+    
+    <div class="header-actions">
+        <button class="btn btn-secondary">Reset Changes</button>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+    </div>
+</header>
 
-<div class="card">
-<h3>Prefix</h3>
-<input type="text" name="prefix" value="{{ settings.prefix }}">
+<!-- Main Container -->
+<div class="container">
+    <!-- Server Header -->
+    <div class="server-header">
+        <div class="server-icon-large">🎮</div>
+        <div class="server-details">
+            <h1>{{ server_name }}</h1>
+            <div class="server-meta">
+                <span>👥 1,245 members</span>
+                <span>💬 45.2K messages</span>
+                <span>🟢 Bot Online</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Layout -->
+    <div class="settings-layout">
+        <!-- Settings Navigation -->
+        <nav class="settings-nav">
+            <a href="#general" class="active">
+                <span>⚙️</span>
+                <span>General</span>
+            </a>
+            <a href="#security">
+                <span>🛡️</span>
+                <span>Security</span>
+            </a>
+            <a href="#moderation">
+                <span>🔨</span>
+                <span>Moderation</span>
+            </a>
+            <a href="#leveling">
+                <span>📊</span>
+                <span>Leveling</span>
+            </a>
+            <a href="#economy">
+                <span>💰</span>
+                <span>Economy</span>
+            </a>
+            <a href="#fun">
+                <span>🎮</span>
+                <span>Fun & Games</span>
+            </a>
+        </nav>
+        
+        <!-- Settings Content -->
+        <div class="settings-content">
+            <form method="POST" id="settingsForm">
+                
+                <!-- General Settings -->
+                <section class="settings-section" id="general">
+                    <div class="section-header">
+                        <h2>⚙️ General Settings</h2>
+                        <p>Basic configuration for your bot</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Command Prefix</label>
+                        <p class="form-description">Character used to trigger bot commands</p>
+                        <input type="text" name="prefix" value="{{ settings.prefix or '!' }}" class="form-input" maxlength="3" placeholder="!">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Bot Language</label>
+                        <select name="language" class="form-select">
+                            <option value="en">English</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                        </select>
+                    </div>
+                </section>
+                
+                <!-- Security Settings -->
+                <section class="settings-section" id="security">
+                    <div class="section-header">
+                        <h2>🛡️ Security & Protection</h2>
+                        <p>Keep your server safe from threats</p>
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <span>✅</span>
+                        <span>All security features are working properly</span>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Anti-Raid Protection</h4>
+                            <p>Automatically locks server when mass joins detected</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="antiraid" {% if settings.antiraid %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Anti-Spam System</h4>
+                            <p>Mutes users sending too many messages</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="antispam" {% if settings.antispam %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Anti-Link Filter</h4>
+                            <p>Prevents unauthorized link posting</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="antilink" {% if settings.antilink %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Bad Words Filter</h4>
+                            <p>Automatically delete messages with profanity</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="badwords_enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </section>
+                
+                <!-- Moderation Settings -->
+                <section class="settings-section" id="moderation">
+                    <div class="section-header">
+                        <h2>🔨 Moderation</h2>
+                        <p>Configure moderation tools and logging</p>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Moderation Commands</h4>
+                            <p>Enable ban, kick, mute, warn commands</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="moderation" {% if settings.moderation %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Auto-Mod Actions</label>
+                        <p class="form-description">What happens at 3 warnings</p>
+                        <select name="automod_action" class="form-select">
+                            <option value="mute">Mute for 1 hour</option>
+                            <option value="kick">Kick from server</option>
+                            <option value="ban">Ban from server</option>
+                            <option value="none">No action</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Mod Log Channel</label>
+                        <select name="modlog_channel" class="form-select">
+                            <option value=""disabled>Select a channel</option>
+                            <option value="logs">#logs</option>
+                            <option value="mod-logs">#mod-logs</option>
+                            <option value="admin">#admin</option>
+                        </select>
+                    </div>
+                </section>
+                
+                <!-- Leveling Settings -->
+                <section class="settings-section" id="leveling">
+                    <div class="section-header">
+                        <h2>📊 Leveling System</h2>
+                        <p>XP, levels, and member engagement</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">12.5K</div>
+                            <div class="stat-label">Total XP Given</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">247</div>
+                            <div class="stat-label">Members Ranked</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">42</div>
+                            <div class="stat-label">Avg Level</div>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Leveling System</h4>
+                            <p>Award XP for messages and activity</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="leveling_enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Level Up Messages</h4>
+                            <p>Announce when members level up</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="levelup_messages" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">XP Per Message</label>
+                        <p class="form-description">Range: 15-25 XP (randomized)</p>
+                        <input type="number" name="xp_min" value="15" class="form-input" min="1" max="100">
+                    </div>
+                </section>
+                
+                <!-- Economy Settings -->
+                <section class="settings-section" id="economy">
+                    <div class="section-header">
+                        <h2>💰 Economy System</h2>
+                        <p>Currency, shop, and rewards</p>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Economy Commands</h4>
+                            <p>Enable balance, work, shop, gamble</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="economy_enabled" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Daily Reward Amount</label>
+                        <input type="number" name="daily_reward" value="500" class="form-input" min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Starting Balance</label>
+                        <p class="form-description">Money new members start with</p>
+                        <input type="number" name="starting_balance" value="1000" class="form-input" min="0">
+                    </div>
+                </section>
+                
+                <!-- Fun Settings -->
+                <section class="settings-section" id="fun">
+                    <div class="section-header">
+                        <h2>🎮 Fun & Games</h2>
+                        <p>Entertainment and engagement features</p>
+                    </div>
+                    
+                    <div class="toggle-group">
+                        <div class="toggle-info">
+                            <h4>Fun Commands</h4>
+                            <p>Enable meme, joke, games, and more</p>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="fun" {% if settings.fun %}checked{% endif %}>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Enabled Games</label>
+                        <div class="checkbox-list">
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="games[]" value="rps" id="rps" checked>
+                                <label for="rps">Rock Paper Scissors</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="games[]" value="trivia" id="trivia" checked>
+                                <label for="trivia">Trivia Questions</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="games[]" value="tictactoe" id="ttt" checked>
+                                <label for="ttt">Tic-Tac-Toe</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="games[]" value="slots" id="slots" checked>
+                                <label for="slots">Slot Machine</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="games[]" value="guess" id="guess" checked>
+                                <label for="guess">Guess the Number</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+            </form>
+        </div>
+    </div>
 </div>
 
-<div class="card">
-<h3>Modules</h3>
-
-<label>Fun</label>
-<input type="checkbox" name="fun" {% if settings.fun %}checked{% endif %}><br>
-
-<label>Moderation</label>
-<input type="checkbox" name="moderation" {% if settings.moderation %}checked{% endif %}>
+<!-- Save Bar -->
+<div class="save-bar" id="saveBar">
+    <div class="save-bar-text">
+        You have unsaved changes
+    </div>
+    <div class="save-bar-actions">
+        <button class="btn btn-secondary" onclick="resetChanges()">Discard</button>
+        <button class="btn btn-primary" onclick="saveSettings()">💾 Save Changes</button>
+    </div>
 </div>
 
-<button>Save</button>
+<script>
+// Show save bar when changes are made
+const form = document.getElementById('settingsForm');
+const saveBar = document.getElementById('saveBar');
 
-</form>
+let formChanged = false;
+
+form.addEventListener('change', () => {
+    formChanged = true;
+    saveBar.classList.add('active');
+});
+
+function saveSettings() {
+    // In real implementation, this would POST to server
+    alert('Settings saved successfully!');
+    formChanged = false;
+    saveBar.classList.remove('active');
+}
+
+function resetChanges() {
+    if (confirm('Are you sure you want to discard all changes?')) {
+        form.reset();
+        formChanged = false;
+        saveBar.classList.remove('active');
+    }
+}
+
+// Smooth scroll for nav
+document.querySelectorAll('.settings-nav a').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const target = document.querySelector(link.getAttribute('href'));
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Update active state
+        document.querySelectorAll('.settings-nav a').forEach(a => a.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+</script>
 
 </body>
 </html>
