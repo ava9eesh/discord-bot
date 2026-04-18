@@ -65,7 +65,7 @@ def callback():
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
-    # 🔥 STEP 1: GET TOKEN
+    # STEP 1: Exchange code for access token
     r = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
     token_json = r.json()
 
@@ -74,18 +74,20 @@ def callback():
 
     access_token = token_json["access_token"]
 
-    # 🔥 STEP 2: GET USER
+    # STEP 2: Get user info
     user = requests.get(
         "https://discord.com/api/users/@me",
         headers={"Authorization": f"Bearer {access_token}"}
     ).json()
 
-    # 🔥 STEP 3: GET GUILDS
+    # STEP 3: Get guilds
     guilds = requests.get(
         "https://discord.com/api/users/@me/guilds",
         headers={"Authorization": f"Bearer {access_token}"}
     ).json()
 
+    # 🔥 IMPORTANT FIX
+    session["token"] = access_token
     session["user"] = user
     session["guilds"] = guilds
 
