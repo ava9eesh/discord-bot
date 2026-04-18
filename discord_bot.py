@@ -687,10 +687,14 @@ async def cat(ctx):
             await ctx.send(embed=embed)
 
 @bot.hybrid_command()
-async def choose(ctx, *choices):
-    if len(choices) < 2:
-        await ctx.send("❌ Provide at least 2 choices!")
-        return
+async def choose(ctx, option1: str, option2: str, option3: str = None, option4: str = None):
+    
+    choices = [option1, option2]
+    if option3:
+        choices.append(option3)
+    if option4:
+        choices.append(option4)
+
     await ctx.send(f"🤔 I choose: **{random.choice(choices)}**")
 
 @bot.hybrid_command()
@@ -1032,24 +1036,23 @@ async def check_reminders():
             reminders.remove(reminder)
 
 @bot.hybrid_command()
-async def poll(ctx, question: str, *options):
-    if len(options) < 2:
-        await ctx.send("❌ Need at least 2 options!")
-        return
+async def poll(ctx, question: str, option1: str, option2: str, option3: str = None, option4: str = None):
     
-    if len(options) > 10:
-        await ctx.send("❌ Maximum 10 options!")
-        return
+    options = [option1, option2]
+    if option3:
+        options.append(option3)
+    if option4:
+        options.append(option4)
 
-    emojis = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']
-    
+    emojis = ['1️⃣','2️⃣','3️⃣','4️⃣']
+
     embed = discord.Embed(title="📊 Poll", description=question, color=discord.Color.blue())
-    
+
     for i, option in enumerate(options):
         embed.add_field(name=f"{emojis[i]} Option {i+1}", value=option, inline=False)
-    
+
     msg = await ctx.send(embed=embed)
-    
+
     for i in range(len(options)):
         await msg.add_reaction(emojis[i])
 

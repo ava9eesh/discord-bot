@@ -12,7 +12,7 @@ app.secret_key = os.getenv("SECRET_KEY", "supersecretkey")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
-BOT_TOKEN = os.getenv("DISCORD_TOKEN")
+BOT_TOKEN = os.getenv("TOKEN")
 
 DISCORD_API = "https://discord.com/api"
 
@@ -45,26 +45,51 @@ def login():
         f"{DISCORD_API}/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20guilds"
     )
 
+import requests
+from flask import request, redirect, session
+
 @app.route("/callback")
 def callback():
     code = request.args.get("code")
 
     data = {
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
+        "client_id": os.getenv("CLIENT_ID"),
+        "client_secret": os.getenv("CLIENT_SECRET"),
         "grant_type": "authorization_code",
         "code": code,
-        "redirect_uri": REDIRECT_URI,
-        "scope": "identify guilds",
+        "redirect_uri": os.getenv("REDIRECT_URI"),
+        "scope": "identify guilds"
     }
 
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    r = requests.post(f"{DISCORD_API}/oauth2/token", data=data, headers=headers)
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
 
-    token = r.json().get("access_token")
-    session["token"] = token
+    # 🔥 STEP 1: GET TOKEN
+    r = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
+    token_json = r.json()
 
-    return redirect(url_for("dashboard"))
+    if "access_token" not in token_json:
+        return f"Error getting token: {token_json}"
+
+    access_token = token_json["access_token"]
+
+    # 🔥 STEP 2: GET USER
+    user = requests.get(
+        "https://discord.com/api/users/@me",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+
+    # 🔥 STEP 3: GET GUILDS
+    guilds = requests.get(
+        "https://discord.com/api/users/@me/guilds",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+
+    session["user"] = user
+    session["guilds"] = guilds
+
+    return redirect("/dashboard")
 
 @app.route("/dashboard")
 def dashboard():
