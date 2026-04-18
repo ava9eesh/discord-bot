@@ -3,6 +3,7 @@ import requests
 import os
 import json
 from dotenv import load_dotenv
+import urllib.parse
 
 load_dotenv()
 
@@ -16,11 +17,15 @@ BOT_TOKEN = os.getenv("TOKEN")
 
 DISCORD_API = "https://discord.com/api"
 
+# ================= BOT CHECK =================
+
 def bot_in_guild(guild_id):
     url = f"{DISCORD_API}/guilds/{guild_id}/members/@me"
     headers = {"Authorization": f"Bot {BOT_TOKEN}"}
     r = requests.get(url, headers=headers)
     return r.status_code == 200
+
+# ================= DATA =================
 
 def load_data():
     try:
@@ -35,6 +40,8 @@ def save_prefix(guild_id, prefix):
     with open("dashboard/data.json", "w") as f:
         json.dump(data, f)
 
+# ================= ROUTES =================
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -42,60 +49,71 @@ def home():
 @app.route("/login")
 def login():
     return redirect(
-        f"{DISCORD_API}/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope=identify%20guilds"
+        f"{DISCORD_API}/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={urllib.parse.quote(REDIRECT_URI)}&response_type=code&scope=identify%20guilds"
     )
 
-import requests
-from flask import request, redirect, session
+# ================= CALLBACK =================
 
 @app.route("/callback")
 def callback():
-    code = request.args.get("code")
+    try:
+        code = request.args.get("code")
 
-    data = {
-        "client_id": os.getenv("CLIENT_ID"),
-        "client_secret": os.getenv("CLIENT_SECRET"),
-        "grant_type": "authorization_code",
-        "code": code,
-        "redirect_uri": os.getenv("REDIRECT_URI"),
-        "scope": "identify guilds"
-    }
+        if not code:
+            return "❌ No code provided"
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
+        data = {
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": REDIRECT_URI,
+            "scope": "identify guilds"
+        }
 
-    # STEP 1: Exchange code for access token
-    r = requests.post("https://discord.com/api/oauth2/token", data=data, headers=headers)
-    token_json = r.json()
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
 
-    if "access_token" not in token_json:
-        return f"Error getting token: {token_json}"
+        # STEP 1: GET TOKEN
+        r = requests.post(f"{DISCORD_API}/oauth2/token", data=data, headers=headers)
+        token_json = r.json()
 
-    access_token = token_json["access_token"]
+        print("TOKEN RESPONSE:", token_json)
 
-    # STEP 2: Get user info
-    user = requests.get(
-        "https://discord.com/api/users/@me",
-        headers={"Authorization": f"Bearer {access_token}"}
-    ).json()
+        if "access_token" not in token_json:
+            return f"❌ Token Error: {token_json}"
 
-    # STEP 3: Get guilds
-    guilds = requests.get(
-        "https://discord.com/api/users/@me/guilds",
-        headers={"Authorization": f"Bearer {access_token}"}
-    ).json()
+        access_token = token_json["access_token"]
 
-    # 🔥 IMPORTANT FIX
-    session["token"] = access_token
-    session["user"] = user
-    session["guilds"] = guilds
+        # STEP 2: GET USER
+        user = requests.get(
+            f"{DISCORD_API}/users/@me",
+            headers={"Authorization": f"Bearer {access_token}"}
+        ).json()
 
-    return redirect("/dashboard")
+        # STEP 3: GET GUILDS
+        guilds = requests.get(
+            f"{DISCORD_API}/users/@me/guilds",
+            headers={"Authorization": f"Bearer {access_token}"}
+        ).json()
+
+        # 🔥 FIX (IMPORTANT)
+        session["token"] = access_token
+        session["user"] = user
+        session["guilds"] = guilds
+
+        return redirect("/dashboard")
+
+    except Exception as e:
+        return f"💥 CALLBACK ERROR: {str(e)}"
+
+# ================= DASHBOARD =================
 
 @app.route("/dashboard")
 def dashboard():
     token = session.get("token")
+
     if not token:
         return redirect(url_for("login"))
 
@@ -115,6 +133,8 @@ def dashboard():
 
     return render_template("dashboard.html", user=user, managed=managed, invite=invite)
 
+# ================= SERVER PANEL =================
+
 @app.route("/server/<guild_id>", methods=["GET", "POST"])
 def server_panel(guild_id):
     if request.method == "POST":
@@ -125,3 +145,8 @@ def server_panel(guild_id):
     current_prefix = data.get(guild_id, "!")
 
     return render_template("server.html", guild_id=guild_id, prefix=current_prefix)
+
+# ================= RUN =================
+
+if __name__ == "__main__":
+    app.run(debug=True)
